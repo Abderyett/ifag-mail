@@ -60,7 +60,7 @@ export default function ContactForm() {
 		setStatus({ type: '', message: '' });
 
 		try {
-			const response = await fetch('http://localhost:8000/api/send-email', {
+			const response = await fetch('https://node-ifag.vispera-dz.com/api/send-email', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(formData),
