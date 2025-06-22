@@ -66,13 +66,13 @@ app.post('/api/send-email', async (req, res) => {
 ::nom : '${nomPrenom || ''}'
 ::Email : '${email || ''}'
 ::Mobile : '${mobile || ''}'
-::bac: '${anneeDuBac || ''}'
+::année: '${anneeDuBac || ''}'
 ::Formation : '${programme || ''}'
 ::Source : '${source || ''}'
 ::Moyenne générale : '${moyenneGenerale || ''}'
-::maths : '${noteMaths || ''}'
-::français : '${noteFrancais || ''}'
-::physique : '${notePhysique || ''}'
+::note en maths : '${noteMaths || ''}'
+::note en français : '${noteFrancais || ''}'
+::note en physique : '${notePhysique || ''}'
 ::spécialité : '${specialite || ''}'
 	`;
 
