@@ -97,7 +97,7 @@ export default function ContactForm() {
 		<div className='min-h-screen bg-gray-50 py-12 px-4'>
 			<div className='max-w-4xl mx-auto'>
 				<div className='bg-white shadow-lg rounded-lg p-8'>
-					<h1 className='text-3xl font-bold text-center mb-8'>Formulaire Prospects IFAG</h1>
+					<h1 className='text-3xl font-bold text-center mb-8'>Formulaire IFAG</h1>
 
 					<div className='space-y-6'>
 						{/* Informations personnelles */}
@@ -109,7 +109,7 @@ export default function ContactForm() {
 									<Input
 										id='nomPrenom'
 										name='nomPrenom'
-										placeholder='Jean Dupont'
+										placeholder='Nom Prénom'
 										value={formData.nomPrenom}
 										onChange={handleInputChange}
 									/>
@@ -121,7 +121,7 @@ export default function ContactForm() {
 										id='email'
 										name='email'
 										type='email'
-										placeholder='jean@example.com'
+										placeholder='jean@gmail.com'
 										value={formData.email}
 										onChange={handleInputChange}
 									/>
@@ -133,7 +133,7 @@ export default function ContactForm() {
 										id='mobile'
 										name='mobile'
 										type='tel'
-										placeholder='06 12 34 56 78'
+										placeholder='0550 000 000'
 										value={formData.mobile}
 										onChange={handleInputChange}
 									/>
@@ -146,7 +146,7 @@ export default function ContactForm() {
 											<SelectValue placeholder='Comment nous avez-vous connu ?' />
 										</SelectTrigger>
 										<SelectContent>
-											{['Passage', 'Salon', 'Recommendation'].map((v) => (
+											{['jpo12', 'Passage', 'Salon', 'Recommendation'].map((v) => (
 												<SelectItem key={v} value={v}>
 													{v}
 												</SelectItem>
@@ -161,7 +161,7 @@ export default function ContactForm() {
 										id='anneeDuBac'
 										name='anneeDuBac'
 										type='number'
-										placeholder='2023'
+										placeholder='2024'
 										min='1990'
 										max='2030'
 										value={formData.anneeDuBac}
@@ -280,6 +280,7 @@ export default function ContactForm() {
 												'LFC 1',
 												'LFC 2',
 												'Master MM',
+											'Master Trasformation digital'
 											].map((v) => (
 												<SelectItem key={v} value={v}>
 													{v}
