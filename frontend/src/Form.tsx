@@ -95,12 +95,16 @@ type ProgrammeRequirement = {
 
 const PROGRAMME_REQUIREMENTS: Record<string, ProgrammeRequirement> = {
 	'Licence Commerce Marketing': { bacType: true, moyenne: true, notes: ['noteFrancais', 'noteMaths'] },
+	'Licence Commerce Marketing Anglais': { moyenne: true, notes: ['noteAnglais', 'noteMaths'] },
+	'Licence Informatique': { moyenne: true, notes: ['noteMaths', 'notePhysique'] },
+	'Licence Finance Comptabilité': { moyenne: true, notes: ['noteFrancais', 'noteMaths'] },
 	'Bachelor Management': { bacType: true, moyenne: true, notes: ['noteFrancais', 'noteMaths'] },
 	'Bachelor Marketing': { bacType: true, moyenne: true, notes: ['noteFrancais', 'noteMaths'] },
-	'Licence Commerce Marketing Anglais': { notes: ['noteAnglais', 'noteMaths'] },
-	'Licence Finance Comptabilité': { notes: ['noteFrancais', 'noteMaths'] },
-	'Licence Informatique': { notes: ['noteMaths', 'notePhysique'] },
-	'Bachelor Info': { notes: ['noteMaths', 'notePhysique'] },
+	'Bachelor Info': { moyenne: true, notes: ['noteMaths', 'notePhysique'] },
+	'Ms Pharma': { moyenne: true },
+	'Ms Finance': { moyenne: true },
+	'Ms Management': { moyenne: true },
+	'Ms RH': { moyenne: true },
 };
 
 const NOTE_STEPS: Record<NoteField, Omit<Step, 'id' | 'kind' | 'field'>> = {
