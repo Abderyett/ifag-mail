@@ -315,8 +315,11 @@ export default function ContactForm() {
 	}, [steps.length]);
 
 	const currentStep = steps[currentStepIndex];
-	const progress = Math.round(((currentStepIndex + 1) / steps.length) * 100);
-	const isLastStep = currentStepIndex === steps.length - 1;
+	const isLastStep = currentStep.id === 'source';
+	const progress = isLastStep
+		? 100
+		: Math.min(95, Math.max(5, Math.round((currentStepIndex / Math.max(steps.length - 1, 1)) * 100)));
+	const visibleStepCount = isLastStep ? steps.length : Math.max(steps.length, currentStepIndex + 2);
 	const currentValue = formData[currentStep.field];
 
 	const resetAfterSchoolChange = (base: FormData, ecole: string): FormData => ({
@@ -621,7 +624,7 @@ export default function ContactForm() {
 								<div className='flex items-center gap-2.5 text-xs font-bold text-slate-500 sm:gap-3 sm:text-sm'>
 									<span style={{ color: IFAG_RED }}>{String(currentStepIndex + 1).padStart(2, '0')}</span>
 									<span>→</span>
-									<span>{String(steps.length).padStart(2, '0')}</span>
+									<span>{String(visibleStepCount).padStart(2, '0')}</span>
 								</div>
 								<div className='space-y-3'>
 									<h1 className='max-w-3xl text-3xl leading-tight font-black tracking-normal text-slate-950 sm:text-5xl'>
