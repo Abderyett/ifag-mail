@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle, Loader2, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from './components/ui/alert';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
@@ -162,6 +162,7 @@ export default function ContactForm() {
 	const [currentStepIndex, setCurrentStepIndex] = useState(0);
 	const [showError, setShowError] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isSubmitted, setIsSubmitted] = useState(false);
 	const [status, setStatus] = useState<{ type: 'success' | 'error' | ''; message: string }>({
 		type: '',
 		message: '',
@@ -412,6 +413,15 @@ export default function ContactForm() {
 		goToNextStep();
 	};
 
+	const resetForm = () => {
+		setFormData(INITIAL_FORM_DATA);
+		setCurrentStepIndex(0);
+		setShowError(false);
+		setIsSubmitting(false);
+		setIsSubmitted(false);
+		setStatus({ type: '', message: '' });
+	};
+
 	const handleSubmit = async () => {
 		const invalidStepIndex = steps.findIndex((step) => getStepError(step));
 
@@ -434,10 +444,11 @@ export default function ContactForm() {
 			const payload = await response.json().catch(() => ({ error: '' }));
 
 			if (response.ok) {
-				setStatus({ type: 'success', message: 'Votre formulaire a été envoyé avec succès !' });
 				setFormData(INITIAL_FORM_DATA);
 				setCurrentStepIndex(0);
 				setShowError(false);
+				setStatus({ type: '', message: '' });
+				setIsSubmitted(true);
 			} else {
 				setStatus({ type: 'error', message: payload.error || "Erreur lors de l'envoi du formulaire" });
 			}
@@ -539,6 +550,47 @@ export default function ContactForm() {
 	};
 
 	const stepError = showError ? getStepError(currentStep) : '';
+
+	if (isSubmitted) {
+		return (
+			<main className='min-h-dvh overflow-hidden bg-slate-100 text-slate-950'>
+				<div className='mx-auto flex min-h-dvh w-full max-w-3xl items-center justify-center px-5 py-10'>
+					<section className='relative flex w-full flex-col items-center text-center animate-in fade-in-0 zoom-in-95 duration-500 motion-reduce:animate-none'>
+						<div className='pointer-events-none absolute -top-12 left-8 hidden size-16 rounded-full bg-emerald-200/50 blur-2xl sm:block' />
+						<div className='pointer-events-none absolute right-8 bottom-10 hidden size-24 rounded-full bg-[#e30613]/10 blur-3xl sm:block' />
+
+						<div className='relative mb-8 grid size-34 place-items-center sm:size-40'>
+							<span className='absolute inset-0 rounded-full bg-emerald-400/20 animate-ping motion-reduce:animate-none' />
+							<span className='absolute inset-4 rounded-full bg-emerald-300/30 animate-pulse motion-reduce:animate-none' />
+							<span className='relative grid size-24 place-items-center rounded-full bg-emerald-500 text-white shadow-[0_22px_60px_rgba(16,185,129,0.35)] sm:size-28'>
+								<CheckCircle className='size-14 stroke-[2.6] sm:size-16' />
+							</span>
+							<Sparkles className='absolute top-2 right-5 size-6 text-emerald-600 animate-bounce motion-reduce:animate-none' />
+							<Sparkles className='absolute bottom-5 left-4 size-5 text-[#e30613] animate-pulse motion-reduce:animate-none' />
+						</div>
+
+						<div className='space-y-4'>
+							<p className='text-sm font-black tracking-wide text-emerald-700 uppercase'>Candidature envoyée</p>
+							<h1 className='text-4xl leading-tight font-black tracking-normal text-slate-950 sm:text-6xl'>
+								Votre inscription a été envoyée.
+							</h1>
+							<p className='mx-auto max-w-md text-base leading-7 font-medium text-slate-600 sm:text-lg'>
+								Merci. Notre équipe va revenir vers vous avec les prochaines étapes.
+							</p>
+						</div>
+
+						<Button
+							type='button'
+							onClick={resetForm}
+							className='mt-9 h-12 rounded-lg bg-[#e30613] px-6 font-bold text-white shadow-sm hover:bg-[#c90010] focus-visible:ring-[#e30613]/30'>
+							Nouvelle inscription
+							<ArrowRight className='size-4' />
+						</Button>
+					</section>
+				</div>
+			</main>
+		);
+	}
 
 	return (
 		<main className='min-h-dvh bg-slate-100 text-slate-950'>
