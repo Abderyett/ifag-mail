@@ -2,15 +2,30 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const path = require('path');
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 8000;
+const allowedOrigins = new Set(['https://salon.ifag-edu.com']);
+const localOriginPattern = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/;
 
 // Middleware setup
 app.use(express.json()); // To parse JSON body from requests
-app.use(cors()); // Allow cross-origin requests from your React app
+app.use(
+	cors({
+		origin(origin, callback) {
+			if (!origin || allowedOrigins.has(origin) || localOriginPattern.test(origin)) {
+				callback(null, true);
+				return;
+			}
+
+			callback(new Error('Not allowed by CORS'));
+		},
+	})
+);
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Check if environment variables are loaded
 console.log('Email User:', process.env.EMAIL_USER ? 'Loaded' : 'Missing');
@@ -41,16 +56,19 @@ app.get('/', (req, res) => {
 // API route for handling form submission
 app.post('/api/send-email', async (req, res) => {
 	const {
+		ecole,
 		nomPrenom,
 		email,
 		mobile,
 		source,
 		anneeDuBac,
+		niveauFormation,
 		specialite,
 		moyenneGenerale,
 		noteMaths,
 		notePhysique,
 		noteFrancais,
+		noteAnglais,
 		programme,
 	} = req.body;
 
@@ -63,15 +81,18 @@ app.post('/api/send-email', async (req, res) => {
 	}
 
 	const emailContent = `
+::Ecole : '${ecole || ''}'
 ::nom : '${nomPrenom || ''}'
 ::Email : '${email || ''}'
 ::Mobile : '${mobile || ''}'
 ::année: '${anneeDuBac || ''}'
+::Niveau : '${niveauFormation || ''}'
 ::Formation : '${programme || ''}'
 ::Source : '${source || ''}'
 ::Moyenne générale : '${moyenneGenerale || ''}'
 ::note en maths : '${noteMaths || ''}'
 ::note en français : '${noteFrancais || ''}'
+::note en anglais : '${noteAnglais || ''}'
 ::note en physique : '${notePhysique || ''}'
 ::spécialité : '${specialite || ''}'
 	`;
