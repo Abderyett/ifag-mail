@@ -8,7 +8,18 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 8000;
-const allowedOrigins = new Set(['https://salon.ifag-edu.com']);
+const defaultAllowedOrigins = [
+	'https://salon.ifag-edu.com',
+	'http://salon.ifag-edu.com',
+	'https://www.salon.ifag-edu.com',
+	'http://www.salon.ifag-edu.com',
+];
+const allowedOrigins = new Set(
+	(process.env.FRONTEND_ORIGINS || defaultAllowedOrigins.join(','))
+		.split(',')
+		.map((origin) => origin.trim())
+		.filter(Boolean)
+);
 const localOriginPattern = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/;
 
 // Middleware setup
@@ -21,7 +32,8 @@ app.use(
 				return;
 			}
 
-			callback(new Error('Not allowed by CORS'));
+			console.warn(`Blocked CORS origin: ${origin}`);
+			callback(null, false);
 		},
 	})
 );
