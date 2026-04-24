@@ -12,6 +12,24 @@ const app = express();
 const port = process.env.PORT || 8000;
 const googleTokenUrl = 'https://oauth2.googleapis.com/token';
 const googleSheetsScope = 'https://www.googleapis.com/auth/spreadsheets';
+const sheetHeaders = [
+	'Date',
+	'Ecole',
+	'Nom',
+	'Email',
+	'Mobile',
+	'Annee Bac',
+	'Niveau',
+	'Formation',
+	'Moyenne generale',
+	'Note maths',
+	'Note francais',
+	'Note anglais',
+	'Note physique',
+	'Specialite',
+	'Source',
+	"Chargee d'admission",
+];
 const defaultAllowedOrigins = [
 	'https://salon.ifag-edu.com',
 	'http://salon.ifag-edu.com',
@@ -75,6 +93,7 @@ if (transporter) {
 }
 
 let cachedGoogleAccessToken = null;
+let sheetHeaderEnsured = false;
 
 const base64UrlEncode = (value) =>
 	Buffer.from(value)
@@ -142,6 +161,25 @@ const getGooglePrivateKey = () => (process.env.GOOGLE_PRIVATE_KEY || '').replace
 const hasGoogleSheetsConfig = () =>
 	Boolean(process.env.GOOGLE_SHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && getGooglePrivateKey());
 
+const getConfiguredSheetName = () => {
+	const range = process.env.GOOGLE_SHEET_RANGE || 'Sheet1!A:P';
+	const separatorIndex = range.indexOf('!');
+
+	return separatorIndex === -1 ? range : range.slice(0, separatorIndex);
+};
+
+const getUnquotedSheetName = () => {
+	const sheetName = getConfiguredSheetName();
+
+	if (sheetName.startsWith("'") && sheetName.endsWith("'")) {
+		return sheetName.slice(1, -1).replace(/''/g, "'");
+	}
+
+	return sheetName;
+};
+
+const getSheetRange = (range) => `${getConfiguredSheetName()}!${range}`;
+
 const createGoogleJwt = () => {
 	const now = Math.floor(Date.now() / 1000);
 	const header = { alg: 'RS256', typ: 'JWT' };
@@ -196,6 +234,7 @@ const buildSheetRow = (submission) => [
 	submission.notePhysique || '',
 	submission.specialite || '',
 	submission.source || '',
+	submission.chargeeAdmission || '',
 ];
 
 const getSheetMetadata = async () => {
@@ -204,11 +243,88 @@ const getSheetMetadata = async () => {
 	}
 
 	const accessToken = await getGoogleAccessToken();
-	const metadataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}?fields=spreadsheetId,properties.title`;
+	const metadataUrl = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}?fields=spreadsheetId,properties.title,sheets.properties(sheetId,title)`;
 
 	return requestJson(metadataUrl, {
 		headers: { Authorization: `Bearer ${accessToken}` },
 	});
+};
+
+const getTargetSheetId = async () => {
+	const metadata = await getSheetMetadata();
+	const targetSheetName = getUnquotedSheetName();
+	const targetSheet = metadata.sheets?.find((sheet) => sheet.properties?.title === targetSheetName);
+
+	if (!targetSheet) {
+		throw new Error(`Sheet tab not found: ${targetSheetName}`);
+	}
+
+	return targetSheet.properties.sheetId;
+};
+
+const updateSheetHeader = async (accessToken) => {
+	const headerRange = getSheetRange(`A1:${String.fromCharCode(64 + sheetHeaders.length)}1`);
+	const updateUrl = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/${encodeURIComponent(
+		headerRange
+	)}?valueInputOption=USER_ENTERED`;
+
+	await requestJson(updateUrl, {
+		method: 'PUT',
+		headers: { Authorization: `Bearer ${accessToken}` },
+		body: { values: [sheetHeaders] },
+	});
+};
+
+const insertHeaderRow = async (accessToken) => {
+	const sheetId = await getTargetSheetId();
+	const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}:batchUpdate`;
+
+	await requestJson(batchUrl, {
+		method: 'POST',
+		headers: { Authorization: `Bearer ${accessToken}` },
+		body: {
+			requests: [
+				{
+					insertDimension: {
+						range: {
+							sheetId,
+							dimension: 'ROWS',
+							startIndex: 0,
+							endIndex: 1,
+						},
+						inheritFromBefore: false,
+					},
+				},
+			],
+		},
+	});
+};
+
+const ensureSheetHeader = async (accessToken) => {
+	if (sheetHeaderEnsured) return;
+
+	const headerRange = getSheetRange(`A1:${String.fromCharCode(64 + sheetHeaders.length)}1`);
+	const headerUrl = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/${encodeURIComponent(
+		headerRange
+	)}`;
+	const headerResponse = await requestJson(headerUrl, {
+		headers: { Authorization: `Bearer ${accessToken}` },
+	});
+	const firstRow = headerResponse.values?.[0] || [];
+	const alreadyHasHeader = firstRow[0] === sheetHeaders[0] && firstRow[sheetHeaders.length - 1] === sheetHeaders[sheetHeaders.length - 1];
+	const hasExistingData = firstRow.some((value) => String(value || '').trim());
+
+	if (alreadyHasHeader) {
+		sheetHeaderEnsured = true;
+		return;
+	}
+
+	if (hasExistingData) {
+		await insertHeaderRow(accessToken);
+	}
+
+	await updateSheetHeader(accessToken);
+	sheetHeaderEnsured = true;
 };
 
 const appendSubmissionToSheet = async (submission) => {
@@ -217,7 +333,9 @@ const appendSubmissionToSheet = async (submission) => {
 	}
 
 	const accessToken = await getGoogleAccessToken();
-	const sheetRange = process.env.GOOGLE_SHEET_RANGE || 'Sheet1!A:O';
+	await ensureSheetHeader(accessToken);
+
+	const sheetRange = getSheetRange(`A:${String.fromCharCode(64 + sheetHeaders.length)}`);
 	const appendUrl = `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/${encodeURIComponent(
 		sheetRange
 	)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
@@ -241,6 +359,7 @@ app.post('/api/send-email', async (req, res) => {
 		email,
 		mobile,
 		source,
+		chargeeAdmission,
 		anneeDuBac,
 		niveauFormation,
 		specialite,
@@ -258,6 +377,7 @@ app.post('/api/send-email', async (req, res) => {
 		email,
 		mobile,
 		source,
+		chargeeAdmission,
 		anneeDuBac,
 		niveauFormation,
 		specialite,
@@ -278,6 +398,7 @@ app.post('/api/send-email', async (req, res) => {
 ::Niveau : '${niveauFormation || ''}'
 ::Formation : '${programme || ''}'
 ::Source : '${source || ''}'
+::Chargé(e) d'admission : '${chargeeAdmission || ''}'
 ::Moyenne générale : '${moyenneGenerale || ''}'
 ::note en maths : '${noteMaths || ''}'
 ::note en français : '${noteFrancais || ''}'
@@ -341,10 +462,12 @@ app.get('/api/health/sheets', async (req, res) => {
 			return;
 		}
 
+		const accessToken = await getGoogleAccessToken();
+		await ensureSheetHeader(accessToken);
 		const sheet = await getSheetMetadata();
 		res.status(200).json({
 			success: true,
-			message: 'Google Sheets credentials are valid',
+			message: 'Google Sheets credentials are valid and the header is ready',
 			sheetTitle: sheet.properties?.title,
 		});
 	} catch (error) {

@@ -40,6 +40,7 @@ const INSAG_PROGRAMMES = [
 const BAC_YEARS = ['2024', '2025', '2026'];
 const BAC_TYPES = ['Science', 'Maths', 'Maths Tech', 'Français', 'Langue', 'Lettre'];
 const SOURCES = ['khotwa alger', 'khotwa oran', 'graduate fair alger', 'graduate fair oran'];
+const ADMISSION_CHARGEES = ['Samir', 'Manel', 'Raouf', 'Radia', 'Wassim'];
 
 const INITIAL_FORM_DATA = {
 	ecole: '',
@@ -47,6 +48,7 @@ const INITIAL_FORM_DATA = {
 	email: '',
 	mobile: '',
 	source: '',
+	chargeeAdmission: '',
 	anneeDuBac: '',
 	niveauFormation: '',
 	specialite: '',
@@ -304,6 +306,14 @@ export default function ContactForm() {
 				title: 'Comment avez-vous connu IFAG / INSAG ?',
 				placeholder: 'Sélectionner une source',
 				options: toOptions(SOURCES),
+			},
+			{
+				id: 'chargee-admission',
+				field: 'chargeeAdmission',
+				kind: 'choice',
+				title: "Qui est le/la chargé(e) d'admission ?",
+				description: "Sélectionnez la personne qui prend en charge cette candidature.",
+				options: toOptions(ADMISSION_CHARGEES),
 			}
 		);
 
@@ -315,7 +325,7 @@ export default function ContactForm() {
 	}, [steps.length]);
 
 	const currentStep = steps[currentStepIndex];
-	const isLastStep = currentStep.id === 'source';
+	const isLastStep = currentStep.id === 'chargee-admission';
 	const progress = isLastStep
 		? 100
 		: Math.min(95, Math.max(5, Math.round((currentStepIndex / Math.max(steps.length - 1, 1)) * 100)));
@@ -328,6 +338,7 @@ export default function ContactForm() {
 		anneeDuBac: '',
 		niveauFormation: '',
 		programme: '',
+		chargeeAdmission: '',
 		specialite: '',
 		moyenneGenerale: '',
 		noteMaths: '',
@@ -340,6 +351,7 @@ export default function ContactForm() {
 		...base,
 		niveauFormation,
 		programme: '',
+		chargeeAdmission: '',
 		specialite: '',
 		moyenneGenerale: '',
 		noteMaths: '',
@@ -351,6 +363,7 @@ export default function ContactForm() {
 	const resetAfterProgrammeChange = (base: FormData, programme: string): FormData => ({
 		...base,
 		programme,
+		chargeeAdmission: '',
 		specialite: '',
 		moyenneGenerale: '',
 		noteMaths: '',
@@ -407,6 +420,7 @@ export default function ContactForm() {
 
 	const handleChoice = (field: FormField, value: string) => {
 		updateField(field, value);
+		if (currentStep.id === 'chargee-admission') return;
 		setCurrentStepIndex((index) => index + 1);
 	};
 
