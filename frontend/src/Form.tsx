@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle, Loader2, Sparkles } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from './components/ui/alert';
 import { Button } from './components/ui/button';
 import { Input } from './components/ui/input';
 import { Label } from './components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
+import { SuccessCheckAnimation } from './components/SuccessCheckAnimation';
 import { cn } from './lib/utils';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/send-email';
@@ -580,15 +581,7 @@ export default function ContactForm() {
 						<div className='pointer-events-none absolute -top-12 left-8 hidden size-16 rounded-full bg-emerald-200/50 blur-2xl sm:block' />
 						<div className='pointer-events-none absolute right-8 bottom-10 hidden size-24 rounded-full bg-[#e30613]/10 blur-3xl sm:block' />
 
-						<div className='relative mb-8 grid size-34 place-items-center sm:size-40'>
-							<span className='absolute inset-0 rounded-full bg-emerald-400/20 animate-ping motion-reduce:animate-none' />
-							<span className='absolute inset-4 rounded-full bg-emerald-300/30 animate-pulse motion-reduce:animate-none' />
-							<span className='relative grid size-24 place-items-center rounded-full bg-emerald-500 text-white shadow-[0_22px_60px_rgba(16,185,129,0.35)] sm:size-28'>
-								<CheckCircle className='size-14 stroke-[2.6] sm:size-16' />
-							</span>
-							<Sparkles className='absolute top-2 right-5 size-6 text-emerald-600 animate-bounce motion-reduce:animate-none' />
-							<Sparkles className='absolute bottom-5 left-4 size-5 text-[#e30613] animate-pulse motion-reduce:animate-none' />
-						</div>
+						<SuccessCheckAnimation size='lg' className='mb-8' />
 
 						<div className='space-y-4'>
 							<p className='text-sm font-black tracking-wide text-emerald-700 uppercase'>Candidature envoyée</p>
