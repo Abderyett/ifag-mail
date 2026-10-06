@@ -44,6 +44,8 @@ const BAC_YEARS = ['2024', '2025', '2026'];
 const BAC_TYPES = ['Science', 'Maths', 'Maths Tech', 'Français', 'Langue', 'Lettre'];
 const SOURCES = ['khotwa alger', 'khotwa oran', 'graduate fair alger', 'graduate fair oran'];
 const ADMISSION_CHARGEES = ['Samir', 'Manel', 'Raouf', 'Radia', 'Wassim'];
+const INSAG_SALES = ['Toufik', 'Wassim', 'Wassil', 'Samir', 'Yasmine'];
+const INSAG_STUDY_LEVELS = ['Bac+2', 'Bac+3', 'Bac+4 et plus'];
 
 const INITIAL_FORM_DATA = {
 	ecole: '',
@@ -61,6 +63,10 @@ const INITIAL_FORM_DATA = {
 	noteFrancais: '',
 	noteAnglais: '',
 	programme: '',
+	anneesExperience: '',
+	niveauEtude: '',
+	poste: '',
+	entreprise: '',
 };
 
 type FormData = typeof INITIAL_FORM_DATA;
@@ -103,15 +109,6 @@ const PROGRAMME_REQUIREMENTS: Record<string, ProgrammeRequirement> = {
 	'Licence Commerce Marketing Anglais': { moyenne: true, notes: ['noteAnglais', 'noteMaths'] },
 	'Licence Informatique': { moyenne: true, notes: ['noteMaths', 'notePhysique'] },
 	'Licence Finance Comptabilité': { moyenne: true, notes: ['noteFrancais', 'noteMaths'] },
-	"MBA Stratégie et Développement de l'Entreprise": { moyenne: true },
-	'MBA Transformation Digitale': { moyenne: true },
-	"MBA Finance d'Entreprise": { moyenne: true },
-	'Management Pharmaceutique': { moyenne: true },
-	'Certification RH': { moyenne: true },
-	'Certification Supply Chain': { moyenne: true },
-	'Certification Marketing AI': { moyenne: true },
-	"Certification Finance d'Entreprise": { moyenne: true },
-	'EMBA Management': { moyenne: true },
 };
 
 const NOTE_STEPS: Record<NoteField, Omit<Step, 'id' | 'kind' | 'field'>> = {
@@ -239,6 +236,72 @@ export default function ContactForm() {
 
 		if (!formData.programme) return nextSteps;
 
+		if (formData.ecole === 'INSAG') {
+			nextSteps.push(
+				{
+					id: 'nom-prenom',
+					field: 'nomPrenom',
+					kind: 'input',
+					title: 'Quel est votre nom et prénom ?',
+					placeholder: 'Ex: Amine Benali',
+					inputType: 'text',
+				},
+				{
+					id: 'mobile',
+					field: 'mobile',
+					kind: 'input',
+					title: 'Quel est votre numéro de téléphone ?',
+					placeholder: 'Ex: 0550 00 00 00',
+					inputType: 'tel',
+				},
+				{
+					id: 'annees-experience',
+					field: 'anneesExperience',
+					kind: 'input',
+					title: "Combien d'années d'expérience avez-vous ?",
+					description: "Saisissez un nombre d'années.",
+					placeholder: 'Ex: 5',
+					inputType: 'number',
+					min: '0',
+					max: '60',
+				},
+				{
+					id: 'niveau-etude',
+					field: 'niveauEtude',
+					kind: 'select',
+					title: "Quel est votre niveau d'étude ?",
+					placeholder: "Sélectionner le niveau d'étude",
+					options: toOptions(INSAG_STUDY_LEVELS),
+				},
+				{
+					id: 'poste',
+					field: 'poste',
+					kind: 'input',
+					title: 'Quel est votre poste de travail ?',
+					placeholder: 'Ex: Responsable RH',
+					inputType: 'text',
+				},
+				{
+					id: 'entreprise',
+					field: 'entreprise',
+					kind: 'input',
+					title: 'Dans quelle entreprise travaillez-vous ?',
+					placeholder: "Ex: Nom de l'entreprise",
+					inputType: 'text',
+				},
+				{
+					id: 'chargee-admission',
+					field: 'chargeeAdmission',
+					kind: 'choice',
+					title: 'Qui est le sales ?',
+					description: 'Sélectionnez la personne qui prend en charge cette candidature.',
+					options: toOptions(INSAG_SALES),
+				}
+			);
+
+			return nextSteps;
+		}
+
 		const requirement = PROGRAMME_REQUIREMENTS[formData.programme] ?? {};
 
 		if (requirement.bacType) {
@@ -333,6 +396,10 @@ export default function ContactForm() {
 		niveauFormation: '',
 		programme: '',
 		chargeeAdmission: '',
+		anneesExperience: '',
+		niveauEtude: '',
+		poste: '',
+		entreprise: '',
 		specialite: '',
 		moyenneGenerale: '',
 		noteMaths: '',

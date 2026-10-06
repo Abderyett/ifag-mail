@@ -29,6 +29,10 @@ const sheetHeaders = [
 	'Specialite',
 	'Source',
 	"Chargee d'admission",
+	'Annees experience',
+	"Niveau d'etude",
+	'Poste',
+	'Entreprise',
 ];
 const defaultAllowedOrigins = [
 	'https://salon.ifag-edu.com',
@@ -235,6 +239,10 @@ const buildSheetRow = (submission) => [
 	submission.specialite || '',
 	submission.source || '',
 	submission.chargeeAdmission || '',
+	submission.anneesExperience || '',
+	submission.niveauEtude || '',
+	submission.poste || '',
+	submission.entreprise || '',
 ];
 
 const getSheetMetadata = async () => {
@@ -319,7 +327,7 @@ const ensureSheetHeader = async (accessToken) => {
 		return;
 	}
 
-	if (hasExistingData) {
+	if (hasExistingData && firstRow[0] !== sheetHeaders[0]) {
 		await insertHeaderRow(accessToken);
 	}
 
@@ -369,6 +377,10 @@ app.post('/api/send-email', async (req, res) => {
 		noteFrancais,
 		noteAnglais,
 		programme,
+		anneesExperience,
+		niveauEtude,
+		poste,
+		entreprise,
 	} = req.body;
 
 	const submission = {
@@ -387,6 +399,10 @@ app.post('/api/send-email', async (req, res) => {
 		noteFrancais,
 		noteAnglais,
 		programme,
+		anneesExperience,
+		niveauEtude,
+		poste,
+		entreprise,
 	};
 
 	const emailContent = `
@@ -405,6 +421,10 @@ app.post('/api/send-email', async (req, res) => {
 ::note en anglais : '${noteAnglais || ''}'
 ::note en physique : '${notePhysique || ''}'
 ::spécialité : '${specialite || ''}'
+::Années d'expérience : '${anneesExperience || ''}'
+::Niveau d'étude : '${niveauEtude || ''}'
+::Poste : '${poste || ''}'
+::Entreprise : '${entreprise || ''}'
 	`;
 
 	const result = {
