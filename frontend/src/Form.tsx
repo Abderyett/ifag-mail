@@ -29,13 +29,15 @@ const IFAG_MASTER_PROGRAMMES = [
 ];
 
 const INSAG_PROGRAMMES = [
-	'Bachelor Management',
-	'Bachelor Marketing',
-	'Bachelor Info',
-	'Ms Pharma',
-	'Ms Finance',
-	'Ms Management',
-	'Ms RH',
+	"MBA Stratégie et Développement de l'Entreprise",
+	'MBA Transformation Digitale',
+	"MBA Finance d'Entreprise",
+	'Management Pharmaceutique',
+	'Certification RH',
+	'Certification Supply Chain',
+	'Certification Marketing AI',
+	"Certification Finance d'Entreprise",
+	'EMBA Management',
 ];
 
 const BAC_YEARS = ['2024', '2025', '2026'];
@@ -101,13 +103,15 @@ const PROGRAMME_REQUIREMENTS: Record<string, ProgrammeRequirement> = {
 	'Licence Commerce Marketing Anglais': { moyenne: true, notes: ['noteAnglais', 'noteMaths'] },
 	'Licence Informatique': { moyenne: true, notes: ['noteMaths', 'notePhysique'] },
 	'Licence Finance Comptabilité': { moyenne: true, notes: ['noteFrancais', 'noteMaths'] },
-	'Bachelor Management': { bacType: true, moyenne: true, notes: ['noteFrancais', 'noteMaths'] },
-	'Bachelor Marketing': { bacType: true, moyenne: true, notes: ['noteFrancais', 'noteMaths'] },
-	'Bachelor Info': { moyenne: true, notes: ['noteMaths', 'notePhysique'] },
-	'Ms Pharma': { moyenne: true },
-	'Ms Finance': { moyenne: true },
-	'Ms Management': { moyenne: true },
-	'Ms RH': { moyenne: true },
+	"MBA Stratégie et Développement de l'Entreprise": { moyenne: true },
+	'MBA Transformation Digitale': { moyenne: true },
+	"MBA Finance d'Entreprise": { moyenne: true },
+	'Management Pharmaceutique': { moyenne: true },
+	'Certification RH': { moyenne: true },
+	'Certification Supply Chain': { moyenne: true },
+	'Certification Marketing AI': { moyenne: true },
+	"Certification Finance d'Entreprise": { moyenne: true },
+	'EMBA Management': { moyenne: true },
 };
 
 const NOTE_STEPS: Record<NoteField, Omit<Step, 'id' | 'kind' | 'field'>> = {
@@ -189,28 +193,17 @@ export default function ContactForm() {
 
 		if (!formData.ecole) return nextSteps;
 
-		nextSteps.push(
-			formData.ecole === 'IFAG'
-				? {
-						id: 'annee-ifag',
-						field: 'anneeDuBac',
-						kind: 'select',
-						title: 'Quelle est votre année du bac ?',
-						description: 'Sélectionnez une année disponible.',
-						placeholder: 'Sélectionner une année',
-						options: toOptions(BAC_YEARS),
-					}
-				: {
-						id: 'annee-insag',
-						field: 'anneeDuBac',
-						kind: 'input',
-						title: 'Quelle est votre année du bac ?',
-						description: 'Saisissez une année sur 4 chiffres.',
-						placeholder: 'Ex: 2024',
-						inputType: 'number',
-						maxLength: 4,
-					}
-		);
+		if (formData.ecole === 'IFAG') {
+			nextSteps.push({
+				id: 'annee-ifag',
+				field: 'anneeDuBac',
+				kind: 'select',
+				title: 'Quelle est votre année du bac ?',
+				description: 'Sélectionnez une année disponible.',
+				placeholder: 'Sélectionner une année',
+				options: toOptions(BAC_YEARS),
+			});
+		}
 
 		if (formData.ecole === 'IFAG') {
 			nextSteps.push({
@@ -389,10 +382,6 @@ export default function ContactForm() {
 		const value = formData[step.field].trim();
 
 		if (!step.optional && !value) return 'Ce champ est obligatoire.';
-
-		if (step.field === 'anneeDuBac' && formData.ecole === 'INSAG' && !/^\d{4}$/.test(value)) {
-			return 'Veuillez saisir une année sur 4 chiffres.';
-		}
 
 		if (
 			['moyenneGenerale', 'noteMaths', 'notePhysique', 'noteFrancais', 'noteAnglais'].includes(step.field) &&
